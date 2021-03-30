@@ -21,7 +21,7 @@
 
 1. [Create an AWS account](https://portal.aws.amazon.com/gp/aws/developer/registration/index.html) if you do not already have one and login.
 
-2. Clone the repo onto your local development machine using `git clone`.
+2. Clone the repo with submodule onto your local development machine using `git clone --recursive <url>`.
 
 ### Installing the application
 
@@ -50,6 +50,8 @@ The frontend code is saved in the `frontend` subdirectory.
 
 1. Before running, you need to set the API Gateway endpoint from the backend deployment on line 10 in the `App.js` file.
 
-2. You cannot run this directly on a local browser, due to way CORS works with localhost. Either [copy the file to an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/upload-objects.html), or [deploy using AWS Amplify Console](https://aws.amazon.com/amplify/console/).
+2. In `frontend` directory run `npm install`. After dependencies are installed run `npm start` to launch application on `http://localhost:3000`
 
-3. Once the page is loaded from a remote location, upload a JPG file in the front-end and you will see the object in the backend S3 bucket.
+3. Usr [this tutorial](https://www.youtube.com/watch?v=DHLZAzdT44Y) to [deploy using AWS Amplify Console](https://aws.amazon.com/amplify/console/).
+
+4. Once the page is loaded from a remote location, upload a PDF file in the front-end and you will see the object in the backend S3 bucket.
