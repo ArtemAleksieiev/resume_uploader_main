@@ -13,7 +13,7 @@
 
 * AWS CLI already configured with Administrator permission
 * [AWS SAM CLI installed](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) - minimum version 0.48.
-* [NodeJS 12.x installed](https://nodejs.org/en/download/)
+* [NodeJS installed](https://nodejs.org/en/download/) installed
 * [React installed](https://www.youtube.com/watch?v=00kXjx9k3Os)
 
 
@@ -52,6 +52,6 @@ The frontend code is saved in the `frontend` subdirectory.
 
 2. In `frontend` directory run `npm install`. After dependencies are installed run `npm start` to launch application on `http://localhost:3000`
 
-3. Usr [this tutorial](https://www.youtube.com/watch?v=DHLZAzdT44Y) to [deploy using AWS Amplify Console](https://aws.amazon.com/amplify/console/).
+3. Use [this tutorial](https://www.youtube.com/watch?v=DHLZAzdT44Y) to [deploy using AWS Amplify Console](https://aws.amazon.com/amplify/console/).
 
 4. Once the page is loaded from a remote location, upload a PDF file in the front-end and you will see the object in the backend S3 bucket.
