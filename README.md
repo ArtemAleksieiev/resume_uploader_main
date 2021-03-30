@@ -25,20 +25,31 @@
 
 ### Installing the application
 
-:
+1. First let's build backend resourses using AWS SAM
 
 ```
-cd .. 
+cd resume_uploader_main
 sam deploy --guided
 ```
 
 When prompted for parameters, enter:
 - Stack Name: s3Uploader
-- AWS Region: your preferred AWS Region (e.g. us-east-1)
+- AWS Region: your preferred AWS Region (e.g. us-east-2)
+- Confirm changes before deploy [y/N]: y
+- UploadRequestFunction may not have authorization defined, Is this okay? [y/N]: y
 - Accept all other defaults.
 
-This takes several minutes to deploy. At the end of the deployment, note the output values, as you need these later.
+This will create cloudformation stack and takes several minutes to deploy resources. At the end of the deployment, note the output values, as you need these later.
 
 - The APIendpoint value is important - it looks like https://ab123345677.execute-api.us-west-2.amazonaws.com.
 - **The upload URL is your endpoint** with the /uploads route added - for example: https://ab123345677.execute-api.us-west-2.amazonaws.com/uploads.
 
+### Testing with the frontend application
+
+The frontend code is saved in the `frontend` subdirectory. 
+
+1. Before running, you need to set the API Gateway endpoint from the backend deployment on line 10 in the `App.js` file.
+
+2. You cannot run this directly on a local browser, due to way CORS works with localhost. Either [copy the file to an S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/upload-objects.html), or [deploy using AWS Amplify Console](https://aws.amazon.com/amplify/console/).
+
+3. Once the page is loaded from a remote location, upload a JPG file in the front-end and you will see the object in the backend S3 bucket.
