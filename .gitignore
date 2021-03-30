@@ -23,7 +23,6 @@ yarn-error.log*
 samconfig.toml
 .aws-sam
 .git
-.gitignore
-.gitmodule
+.gitmodules
 localTestEvent.json
 package-lock.json
