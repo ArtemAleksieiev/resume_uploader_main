@@ -1,6 +1,6 @@
 # resume_uploader_main
 
-![GitHub Logo](architecture.png)
+![GitHub Logo](architecture1.png)
 
 ```bash
 .
@@ -9,13 +9,13 @@
 ├── getSignedURL                <-- Source code for the serverless backend
 ├── template.yaml               <-- SAM template for deploying serverless resourses
 ```
+
 ## Requirements
 
-* AWS CLI already configured with Administrator permission
-* [AWS SAM CLI installed](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) - minimum version 0.48.
-* [NodeJS 12.x installed](https://nodejs.org/en/download/)
-* [React installed](https://www.youtube.com/watch?v=00kXjx9k3Os)
-
+- AWS CLI already configured with Administrator permission
+- [AWS SAM CLI installed](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) - minimum version 0.48.
+- [NodeJS 12.x installed](https://nodejs.org/en/download/)
+- [React installed](https://www.youtube.com/watch?v=00kXjx9k3Os)
 
 ## Installation Instructions
 
@@ -33,6 +33,7 @@ sam deploy --guided
 ```
 
 When prompted for parameters, enter:
+
 - Stack Name: s3Uploader
 - AWS Region: your preferred AWS Region (e.g. us-east-2)
 - Confirm changes before deploy [y/N]: y
@@ -46,7 +47,7 @@ This will create cloudformation stack and takes several minutes to deploy resour
 
 ### Testing with the frontend application
 
-The frontend code is saved in the `frontend` subdirectory. 
+The frontend code is saved in the `frontend` subdirectory.
 
 1. Before running, you need to set the API Gateway endpoint from the backend deployment on line 10 in the `App.js` file.
 
