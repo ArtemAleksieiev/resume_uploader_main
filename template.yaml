@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: S3 Uploader 
 
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: ResumeUploader
+    Description: Serverless Backend for ResumeUploader
+    Author: Artem Aleksieiev
+
 Resources:
   # HTTP API
   MyApi:
@@ -19,8 +25,57 @@ Resources:
           - "*"   
         AllowOrigins: 
           - "*"      
+      Tags:
+        Application: ResumeUploader
+  GetDataRequestFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: getData/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Timeout: 3
+      MemorySize: 128
+      Environment:
+        Variables:
+          DbTable: !Ref DynamoTable  
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoTable
+      Events:
+        UploadAssetAPI:
+          Type: HttpApi
+          Properties:
+            Path: /
+            Method: get
+            ApiId: !Ref MyApi
+            
+      Tags:
+        Application: ResumeUploader 
 
-  ## Lambda functions
+  PostDataFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: postData/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Timeout: 3
+      MemorySize: 128
+      Environment:
+        Variables:
+          DbTable: !Ref DynamoTable  
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref DynamoTable
+      Events:
+        UploadAssetAPI:
+          Type: HttpApi
+          Properties:
+            Path: /uploads
+            Method: post
+            ApiId: !Ref MyApi
+            
+      Tags:
+        Application: ResumeUploader 
   UploadRequestFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -48,7 +103,10 @@ Resources:
           Properties:
             Path: /uploads
             Method: get
-            ApiId: !Ref MyApi  
+            ApiId: !Ref MyApi
+
+      Tags:
+        Application: ResumeUploader 
 
   ## S3 bucket
   S3UploadBucket:
@@ -64,6 +122,23 @@ Resources:
             - HEAD
           AllowedOrigins:
             - "*"
+      Tags:
+        - Key: "Application"
+          Value: "ResumeUploader"
+
+  DynamoTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: DynamoTable
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5  
 
 ## Take a note of the outputs for deploying the workflow templates in this sample application
 Outputs:
@@ -73,3 +148,12 @@ Outputs:
   S3UploadBucketName:
     Description: "S3 bucket for application uploads"
     Value: !Ref 'S3UploadBucket'  
+  GetDataRequestFunction:
+    Value: !Ref GetDataRequestFunction
+    Description: LambdaGetDynamoDB function  Arn
+  PostDataFunction:
+    Value: !Ref PostDataFunction
+    Description: LambdaPostDynamoDB function  Arn
+  DynamoDbTable:
+    Value: !Ref DynamoTable
+    Description: DynamoDb Table 
