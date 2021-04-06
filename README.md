@@ -10,14 +10,7 @@
 ├── template.yaml               <-- SAM template for deploying serverless resourses
 ```
 
-<<<<<<< HEAD
 ## Requirements
-=======
-* AWS CLI already configured with Administrator permission
-* [AWS SAM CLI installed](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) - minimum version 0.48.
-* [NodeJS installed](https://nodejs.org/en/download/) installed
-* [React installed](https://www.youtube.com/watch?v=00kXjx9k3Os)
->>>>>>> f5421c01a8f9fbce8bd9e50dbfe992f073373897
 
 - AWS CLI already configured with Administrator permission
 - [AWS SAM CLI installed](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) - minimum version 0.48.
