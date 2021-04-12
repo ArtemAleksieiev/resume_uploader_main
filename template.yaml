@@ -52,30 +52,6 @@ Resources:
       Tags:
         Application: ResumeUploader 
 
-  PostDataFunction:
-    Type: AWS::Serverless::Function 
-    Properties:
-      CodeUri: postData/
-      Handler: app.handler
-      Runtime: nodejs12.x
-      Timeout: 3
-      MemorySize: 128
-      Environment:
-        Variables:
-          DbTable: !Ref DynamoTable  
-      Policies:
-        - DynamoDBWritePolicy:
-            TableName: !Ref DynamoTable
-      Events:
-        UploadAssetAPI:
-          Type: HttpApi
-          Properties:
-            Path: /uploads
-            Method: post
-            ApiId: !Ref MyApi
-            
-      Tags:
-        Application: ResumeUploader 
   UploadRequestFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -90,13 +66,6 @@ Resources:
       Policies:
         - S3WritePolicy:
             BucketName: !Ref S3UploadBucket
-        ## This permission allows the Lambda function to request signed URLs
-        ## for objects that will be publicly readable. Uncomment if you want this ACL.
-        # - Statement:
-        #   - Effect: Allow
-        #     Resource: !Sub 'arn:aws:s3:::${S3UploadBucket}/'
-        #     Action:
-        #       - s3:putObjectAcl
       Events:
         UploadAssetAPI:
           Type: HttpApi
@@ -104,7 +73,6 @@ Resources:
             Path: /uploads
             Method: get
             ApiId: !Ref MyApi
-
       Tags:
         Application: ResumeUploader 
 
@@ -140,6 +108,93 @@ Resources:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5  
 
+## Resources befongs to Textract architecture
+  TextractSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub "textract-sns-topic"
+      TopicName: !Sub "textract-sns-topic"
+      Subscription:
+        - Protocol: lambda
+          Endpoint: !GetAtt TextractEndFunction.Arn
+
+  TextractSNSTopicPolicy:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref TextractEndFunction
+      Principal: sns.amazonaws.com
+      Action: lambda:InvokeFunction
+      SourceArn: !Ref TextractSNSTopic
+
+  TextractEndFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 10
+      CodeUri: textractFunc/
+      Handler: handler.textractEndHandler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          DbTable: !Ref DynamoTable
+      Role: !GetAtt TextractRole.Arn
+      
+
+  TextractStartFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          TEXT_EXTRACT_ROLE: !GetAtt TextractRole.Arn
+          SNS_TOPIC: !Ref TextractSNSTopic
+      Role: !GetAtt TextractRole.Arn
+      CodeUri: textractFunc/
+      Handler: handler.textractStartHandler
+      Runtime: nodejs12.x
+      Events:
+        PDFUploadEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref S3UploadBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: ".pdf"
+  TextractRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "textract.amazonaws.com"
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AWSLambdaExecute"
+      Policies:
+        - PolicyName: "TextractRoleAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "sns:*"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "textract:*"
+                  - "comprehend:*"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "dynamodb:PutItem"
+                Resource: !GetAtt DynamoTable.Arn
+
 ## Take a note of the outputs for deploying the workflow templates in this sample application
 Outputs:
   APIendpoint:
@@ -151,9 +206,6 @@ Outputs:
   GetDataRequestFunction:
     Value: !Ref GetDataRequestFunction
     Description: LambdaGetDynamoDB function  Arn
-  PostDataFunction:
-    Value: !Ref PostDataFunction
-    Description: LambdaPostDynamoDB function  Arn
   DynamoDbTable:
     Value: !Ref DynamoTable
     Description: DynamoDb Table 
