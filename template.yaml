@@ -108,7 +108,7 @@ Resources:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5  
 
-## Resources befongs to Textract architecture
+## Resources belongs to Textract architecture
   TextractSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -138,6 +138,14 @@ Resources:
           DbTable: !Ref DynamoTable
       Role: !GetAtt TextractRole.Arn
       
+  OnSuccessFunction:
+    Type: AWS::Serverless::Function
+    Description: Invoked by ProducerFunction Lambda onSuccess
+    Properties:
+      CodeUri: OnSuccessFunction/
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Timeout: 3
 
   TextractStartFunction:
     Type: AWS::Serverless::Function
@@ -194,6 +202,10 @@ Resources:
                 Action:
                   - "dynamodb:PutItem"
                 Resource: !GetAtt DynamoTable.Arn
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
 
 ## Take a note of the outputs for deploying the workflow templates in this sample application
 Outputs:

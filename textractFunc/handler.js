@@ -3,6 +3,9 @@ const { EOL } = require("os");
 const textract = new AWS.Textract();
 const comprehend = new AWS.Comprehend();
 const docClient = new AWS.DynamoDB.DocumentClient();
+var lambda = new AWS.Lambda({
+  region: 'us-east-2' //change to your region
+});
 
 exports.textractStartHandler = async (event, context, callback) => {
     try {
@@ -53,11 +56,22 @@ exports.textractEndHandler = async (event, context, callback) => {
         } = JSON.parse(Message);
         if (status === "SUCCEEDED") {
             const textResult = await getDocumentText(jobId, null);
-            console.log(textResult.replace(/,/g,''));
+            const textResume = textResult.replace(/,/g,'')
+            console.log(textResume);
             const parameters = {
                 LanguageCode: "en",
                 Text: textResult.replace(/,/g,'')
                 };
+            lambda.invoke({
+                FunctionName: 'arn:aws:lambda:us-east-2:175628237821:function:S3uploader-OnSuccessFunction-1DEUHL1PPNA04',
+                Payload: JSON.stringify(textResume, null, 2)
+                }, function(error, data) {
+                    if (error) {
+                    context.done('error', error);
+                    } if(data.Payload) {
+                    context.succeed(data.Payload)
+                    }
+                });
             const response = await comprehend.detectEntities(parameters).promise();
             console.log(response['Entities']);
             const fullName = getFullName(response['Entities']);

@@ -1,6 +1,6 @@
 # resume_uploader_main
 
-![GitHub Logo](architecture1.png)
+![GitHub Logo](architectureML.png)
 
 ```bash
 .
