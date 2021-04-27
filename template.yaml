@@ -140,12 +140,23 @@ Resources:
       
   OnSuccessFunction:
     Type: AWS::Serverless::Function
-    Description: Invoked by ProducerFunction Lambda onSuccess
+    Description: Invoked by TextractEndFunction
     Properties:
-      CodeUri: OnSuccessFunction/
-      Handler: app.lambda_handler
-      Runtime: python3.8
-      Timeout: 3
+      PackageType: Image
+      MemorySize: 512
+      ImageConfig:
+        Command: ["app.lambda_handler"]
+      Environment:
+        Variables:
+          DbTable: !Ref DynamoTable
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref DynamoTable
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./OnSuccessFunction
+      DockerTag: v1
+      
 
   TextractStartFunction:
     Type: AWS::Serverless::Function

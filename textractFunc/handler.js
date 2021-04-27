@@ -11,6 +11,7 @@ exports.textractStartHandler = async (event, context, callback) => {
     try {
     const bucket = event.Records[0].s3.bucket.name;
     const key = event.Records[0].s3.object.key;
+    console.log(key);
     const params = {
         DocumentLocation: {
             S3Object: {
@@ -62,9 +63,17 @@ exports.textractEndHandler = async (event, context, callback) => {
                 LanguageCode: "en",
                 Text: textResult.replace(/,/g,'')
                 };
+            
+            const response = await comprehend.detectEntities(parameters).promise();
+            console.log(response['Entities']);
+            const fullName = getFullName(response['Entities']);
+            const fileUrl = `https://${S3Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${S3ObjectName}`;
+            console.log(fullName);
+            const fname =  fullName.split(' ').slice(0, -1).join(' ')
+            const lname = fullName.split(' ').slice(-1).join(' ')
             lambda.invoke({
-                FunctionName: 'arn:aws:lambda:us-east-2:175628237821:function:S3uploader-OnSuccessFunction-1DEUHL1PPNA04',
-                Payload: JSON.stringify(textResume, null, 2)
+                FunctionName: 'arn:aws:lambda:us-east-2:175628237821:function:S3uploader-OnSuccessFunction-1AEKFLEEYA5QS',
+                Payload: JSON.stringify({"key1":textResume, "key2":fname, "key3":lname, "key4":fileUrl}, null, 2),
                 }, function(error, data) {
                     if (error) {
                     context.done('error', error);
@@ -72,12 +81,7 @@ exports.textractEndHandler = async (event, context, callback) => {
                     context.succeed(data.Payload)
                     }
                 });
-            const response = await comprehend.detectEntities(parameters).promise();
-            console.log(response['Entities']);
-            const fullName = getFullName(response['Entities']);
-            const fileUrl = `https://${S3Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${S3ObjectName}`;
-            console.log(fullName);
-            const params = {
+/*            const params = {
                 Item: {
                     id: Date.now().toString(),
                     fname: fullName.split(' ').slice(0, -1).join(' '),
@@ -90,7 +94,7 @@ exports.textractEndHandler = async (event, context, callback) => {
             docClient.put(params, function(err, data) {
                 if (err) console.log(err);
                 else console.log(data);
-            });
+            });*/
         }
     } catch (error) {
         callback(error);
