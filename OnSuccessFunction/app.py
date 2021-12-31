@@ -8,8 +8,9 @@ import datetime
 
 nlp = spacy.load('en_core_web_sm')
 
+
 def lambda_handler(event, context):
-    #print("Received event key1: " + event['key1'])
+    print("Received event key1: " + event['key1'])
     print(os.environ.get('DbTable'))
     text_resume = extract_text(event['key1'])
     fname = event['key2']
@@ -18,7 +19,7 @@ def lambda_handler(event, context):
     print(fname, lname)
     print(text_resume)
     phone = extract_mobile_number(text_resume)
-    print (phone)
+    print(phone)
     email = extract_email(text_resume)
     print(email)
     skillslist = extract_skills(text_resume)
@@ -38,9 +39,8 @@ def lambda_handler(event, context):
         }
     )
 
-
-
     return 'Success'  # Echo back the first key value
+
 
 def extract_text(received):
     text = [line.replace('\t', ' ') for line in received.split('\n') if line]
@@ -48,14 +48,16 @@ def extract_text(received):
 
 
 def extract_mobile_number(text):
-    phone = re.findall(re.compile(r'(?:(?:\+?([1-9]|[0-9][0-9]|[0-9][0-9][0-9])\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([0-9][1-9]|[0-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?'), text)
-    
+    phone = re.findall(re.compile(
+        r'(?:(?:\+?([1-9]|[0-9][0-9]|[0-9][0-9][0-9])\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([0-9][1-9]|[0-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?'), text)
+
     if phone:
         number = ''.join(phone[0])
         if len(number) > 10:
             return '+' + number
         else:
             return number
+
 
 def extract_email(email):
     email = re.findall("([^@|\s]+@[^@]+\.[^@|\s]+)", email)
@@ -65,11 +67,12 @@ def extract_email(email):
         except IndexError:
             return None
 
+
 def extract_skills(resume_text):
     print('Start execution')
     nlp_text = nlp(resume_text)
     all_stopwords = nlp.Defaults.stop_words
-    
+
     # removing stop words and implementing word tokenization
     #text_tokens = word_tokenize(resume_text)
     #tokens = [word for word in text_tokens if not word in all_stopwords]
@@ -82,28 +85,28 @@ def extract_skills(resume_text):
     print(tokens)
 
     # reading the csv file
-    data = pd.read_csv("skills.csv") 
-    #print(data)
+    data = pd.read_csv("skills.csv")
+    # print(data)
     # extract values
     skills = list(data.columns.values)
-    #print(skills)
+    # print(skills)
     skillset = []
-    
+
     # check for one-grams (example: python)
     for tok in tokens:
         if tok.text.lower() in skills:
             skillset.append(tok)
-    #print(skillset)
+    # print(skillset)
     #print("Noun_Chunks:", type(nlp_text.noun_chunks))
     # check for bi-grams and tri-grams (example: machine learning)
-    #for toke in nlp_text.noun_chunks:
+    # for toke in nlp_text.noun_chunks:
     #    toke = toke.text.lower().strip()
     #    if toke in skills:
     #        skillset.append(toke)
     #print('Skillset: ',skillset)
     #print('Skillset[0]', skillset[0])
     #print('type of skillset[3]', type(skillset[3]))
-    #for skill in skillset:
+    # for skill in skillset:
     #    print(type(skill))
 
     return [i.capitalize() for i in set([i.text.lower() for i in skillset])]
